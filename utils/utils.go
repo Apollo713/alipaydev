@@ -212,9 +212,13 @@ func stitchingBytes(multiBytes [][]byte, operate int) string {
 			if strings.Contains(string(v), "biz_content") {
 				var needString string = string(dealEmptyJson(v))
 				//				fmt.Println("处理后的json:", needString)
+				if operate == 2 {
+					needString = strings.Replace(needString, " ", "+", -1)
+				}
 				signBuf.WriteString(needString)
 				signBuf.WriteString("&")
-			} else if strings.Contains(string(v), "timestamp") && operate == 2 {
+			} else if strings.Contains(string(v), " ") && operate == 2 {
+				fmt.Println("当前带空格的字符串为:", string(v))
 				signBuf.WriteString(strings.Replace(string(v), " ", "+", -1))
 				signBuf.WriteString("&")
 			} else {
@@ -222,49 +226,50 @@ func stitchingBytes(multiBytes [][]byte, operate int) string {
 				signBuf.WriteString("&")
 			}
 			/*
-				//用map清除空值有问题
-
-					//处理biz_content 处理里面的空值
-					if strings.Contains(string(v), "biz_content") {
-						var bracketIndex int
-						for index, value := range v {
-							if string(value) == "=" {
-								bracketIndex = index + 1
-								break
-							}
+				//处理biz_content 处理里面的空值
+				if strings.Contains(string(v), "biz_content") {
+					var bracketIndex int
+					for index, value := range v {
+						if string(value) == "=" {
+							bracketIndex = index + 1
+							break
 						}
-						var jsonStr string = string(v[bracketIndex:])
-						//json str 转map
-						var dat map[string]interface{}
-						if err := json.Unmarshal([]byte(jsonStr), &dat); err == nil {
-							//					fmt.Println("==============json str 转map=======================")
-							//					fmt.Println(dat)
-						}
-						//				fmt.Println("=================清除功能=====================")
-						for k, v := range dat {
-
-							value, _ := v.(string)
-							//					fmt.Println("key:", k, "          ", "value:", value)
-							if value == "" || value == "[]" || value == "null" {
-								delete(dat, k)
-							}
-						}
-						//map 到json str
-						//				fmt.Println("================map 到json str=====================")
-						jsonBytes, _ := json.Marshal(dat)
-						//				fmt.Println(string(jsonBytes))
-
-						signBuf.WriteString("biz_content=")
-						signBuf.WriteString(string(jsonBytes))
-						signBuf.WriteString("&")
-					} else {
-						signBuf.WriteString(string(v))
-						signBuf.WriteString("&")
 					}
+					var jsonStr string = string(v[bracketIndex:])
+					//json str 转map
+					var dat map[string]interface{}
+					if err := json.Unmarshal([]byte(jsonStr), &dat); err == nil {
+						//					fmt.Println("==============json str 转map=======================")
+						//					fmt.Println(dat)
+					}
+					//				fmt.Println("=================清除功能=====================")
+					for k, v := range dat {
+
+						value, _ := v.(string)
+						//					fmt.Println("key:", k, "          ", "value:", value)
+						if value == "" || value == "[]" || value == "null" {
+							delete(dat, k)
+						}
+					}
+					//map 到json str
+					//				fmt.Println("================map 到json str=====================")
+					jsonBytes, _ := json.Marshal(dat)
+					//				fmt.Println(string(jsonBytes))
+
+					signBuf.WriteString("biz_content=")
+					signBuf.WriteString(string(jsonBytes))
+					signBuf.WriteString("&")
+				} else {
+					signBuf.WriteString(string(v))
+					signBuf.WriteString("&")
+				}
 			*/
 
 		}
 	}
+	//	signString := strings.Replace(signBuf.String(), "[", "\"", -1)
+	//	signString = strings.Replace(signString, "]", "\"", -1)
+	//	signString = strings.Replace(signString, "null", "\"\"", -1)
 	return signBuf.String()
 }
 
